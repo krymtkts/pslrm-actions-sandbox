@@ -1,0 +1,77 @@
+name: pslrm-bump-action detects changes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  has_changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out sandbox repository
+        uses: actions/checkout@v4
+
+      - name: Run pslrm-bump-action for stale-lockfile fixture
+        id: bump
+        uses: krymtkts/pslrm-bump-action@main
+        with:
+          project-path: projects/stale-lockfile-project
+          github-token: ${{ github.token }}
+
+      - name: Assert changed is true
+        shell: pwsh
+        env:
+          CHANGED: ${{ steps.bump.outputs.changed }}
+        run: |
+          if ($env:CHANGED -ne 'true') {
+            throw "Expected changed=true, but got '$env:CHANGED'."
+          }
+
+      - name: Assert bump branch and pull request exist
+        shell: pwsh
+        env:
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          GH_TOKEN: ${{ github.token }}
+          LOCKFILE_PATH: projects/stale-lockfile-project/psreq.lock.psd1
+          REPOSITORY_FULL_NAME: ${{ github.repository }}
+        run: |
+          $currentBranch = @(git branch --show-current) | Select-Object -Last 1
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Failed to determine the current bump branch.'
+          }
+
+          if ([string]::IsNullOrWhiteSpace($currentBranch)) {
+            throw 'Expected the checkout to be on the bump branch after the action ran.'
+          }
+
+          if ($currentBranch -eq $env:BASE_BRANCH) {
+            throw "Expected a bump branch, but the checkout is still on base branch '$env:BASE_BRANCH'."
+          }
+
+          $changedFiles = @(
+            git show --pretty='' --name-only HEAD --
+          ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Failed to inspect the bump commit.'
+          }
+
+          if ($changedFiles -notcontains $env:LOCKFILE_PATH) {
+            throw "Expected HEAD to include '$env:LOCKFILE_PATH', but got: $($changedFiles -join ', ')"
+          }
+
+          $pullRequestNumber = @(
+            gh pr list --repo $env:REPOSITORY_FULL_NAME --base $env:BASE_BRANCH --head $currentBranch --state open --json number --jq '.[0].number'
+          ) | Select-Object -Last 1
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Failed to query the bump pull request.'
+          }
+
+          if ([string]::IsNullOrWhiteSpace($pullRequestNumber)) {
+            throw "Expected an open pull request from '$currentBranch' into '$env:BASE_BRANCH'."
+          }
+
+          Write-Host "Has-changes validation passed with PR #$pullRequestNumber on '$currentBranch'."
