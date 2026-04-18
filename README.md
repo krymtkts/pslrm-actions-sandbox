@@ -6,15 +6,16 @@ This repository covers [`krymtkts/pslrm-bump-action`](https://github.com/krymtkt
 
 ## Workflows
 
-### `pslrm-bump-smoke`
+### `pslrm-bump-no-change`
 
 This workflow will run against `projects/no-change-project`.
 
 - Purpose: confirm `pslrm-bump-action` reports `changed=false` when the lockfile is up to date.
+- File: `.github/workflows/pslrm-bump-no-change.yml`
 - Trigger: `workflow_dispatch`
 - Permissions: `contents: read`
 
-### `pslrm-bump-live`
+### `pslrm-bump-has-changes`
 
 This workflow will run against `projects/stale-lockfile-project`.
 

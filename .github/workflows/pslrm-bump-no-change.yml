@@ -1,0 +1,33 @@
+name: pslrm-bump-action detects no changes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  no_change:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out sandbox repository
+        uses: actions/checkout@v4
+
+      - name: Run pslrm-bump-action for no-change fixture
+        id: bump
+        uses: krymtkts/pslrm-bump-action@main
+        with:
+          project-path: projects/no-change-project
+          github-token: ${{ github.token }}
+
+      - name: Assert changed is false
+        shell: pwsh
+        env:
+          CHANGED: ${{ steps.bump.outputs.changed }}
+        run: |
+          if ($env:CHANGED -ne 'false') {
+            throw "Expected changed=false, but got '$env:CHANGED'."
+          }
+
+          Write-Host 'No-change validation passed with changed=false.'
