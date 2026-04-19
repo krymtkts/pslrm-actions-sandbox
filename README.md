@@ -20,8 +20,25 @@ This workflow will run against `projects/no-change-project`.
 This workflow will run against `projects/stale-lockfile-project`.
 
 - Purpose: confirm branch creation, commit, push, and pull request create-or-update behavior.
+- Prerequisite: turn on `Allow GitHub Actions to create and approve pull requests`.
+- Token: this workflow uses `GITHUB_TOKEN`.
 - Trigger: `workflow_dispatch`
 - Permissions: `contents: write` and `pull-requests: write`
+
+You can verify the repository setting with GitHub CLI:
+
+```powershell
+gh api --method GET repos/krymtkts/pslrm-actions-sandbox/actions/permissions/workflow
+```
+
+The setting is on when `can_approve_pull_request_reviews` is `true`.
+You can enable it with:
+
+```powershell
+gh api --method PUT repos/krymtkts/pslrm-actions-sandbox/actions/permissions/workflow `
+  -f default_workflow_permissions=read `
+  -F can_approve_pull_request_reviews=true
+```
 
 ## Fixtures
 
