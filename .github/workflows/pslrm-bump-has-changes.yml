@@ -58,7 +58,7 @@ jobs:
           }
 
           $pullRequestJson = @(
-            gh pr view $env:PULL_REQUEST_NUMBER --repo $env:REPOSITORY_FULL_NAME --json number,headRefName,baseRefName,files
+            gh pr view $env:PULL_REQUEST_NUMBER --repo $env:REPOSITORY_FULL_NAME --json 'number,headRefName,baseRefName,files'
           ) | Select-Object -Last 1
           if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($pullRequestJson)) {
             throw "Failed to inspect bump pull request #$env:PULL_REQUEST_NUMBER."
