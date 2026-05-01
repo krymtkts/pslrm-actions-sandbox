@@ -28,16 +28,5 @@ jobs:
           PULL_REQUEST_NUMBER: ${{ steps.bump.outputs.pull_request_number }}
           RESULT: ${{ steps.bump.outputs.result }}
         run: |
-          if ($env:RESULT -ne 'no_change') {
-            throw "Expected result=no_change, but got '$env:RESULT'."
-          }
-
-          if (-not [string]::IsNullOrWhiteSpace($env:BUMP_BRANCH_NAME)) {
-            throw "Expected bump_branch_name to be empty, but got '$env:BUMP_BRANCH_NAME'."
-          }
-
-          if (-not [string]::IsNullOrWhiteSpace($env:PULL_REQUEST_NUMBER)) {
-            throw "Expected pull_request_number to be empty, but got '$env:PULL_REQUEST_NUMBER'."
-          }
-
-          Write-Host 'No-change validation passed with result=no_change.'
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE 'scripts/Assert-PslrmBumpNoChange.ps1'
+          & $scriptPath

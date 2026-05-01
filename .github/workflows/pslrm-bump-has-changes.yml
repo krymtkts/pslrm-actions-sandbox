@@ -22,26 +22,7 @@ jobs:
           project-path: projects/stale-lockfile-project
           github-token: ${{ github.token }}
 
-      - name: Assert result indicates a change
-        shell: pwsh
-        env:
-          BUMP_BRANCH_NAME: ${{ steps.bump.outputs.bump_branch_name }}
-          PULL_REQUEST_NUMBER: ${{ steps.bump.outputs.pull_request_number }}
-          RESULT: ${{ steps.bump.outputs.result }}
-        run: |
-          if ($env:RESULT -notin @('created', 'updated', 'noop')) {
-            throw "Expected result to be one of 'created', 'updated', or 'noop', but got '$env:RESULT'."
-          }
-
-          if ([string]::IsNullOrWhiteSpace($env:BUMP_BRANCH_NAME)) {
-            throw 'Expected bump_branch_name to be populated for a changed run.'
-          }
-
-          if ([string]::IsNullOrWhiteSpace($env:PULL_REQUEST_NUMBER)) {
-            throw 'Expected pull_request_number to be populated for a changed run.'
-          }
-
-      - name: Assert bump branch and pull request exist
+      - name: Assert changed run outputs and created resources
         shell: pwsh
         env:
           BASE_BRANCH: ${{ github.event.repository.default_branch }}
@@ -53,44 +34,5 @@ jobs:
           REPOSITORY_FULL_NAME: ${{ github.repository }}
           RESULT: ${{ steps.bump.outputs.result }}
         run: |
-          if (-not $env:BUMP_BRANCH_NAME.StartsWith($env:BUMP_BRANCH_PREFIX)) {
-            throw "Expected bump branch prefix '$env:BUMP_BRANCH_PREFIX', but got '$env:BUMP_BRANCH_NAME'."
-          }
-
-          $pullRequestJson = @(
-            gh pr view $env:PULL_REQUEST_NUMBER --repo $env:REPOSITORY_FULL_NAME --json 'number,headRefName,baseRefName,files'
-          ) | Select-Object -Last 1
-          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($pullRequestJson)) {
-            throw "Failed to inspect bump pull request #$env:PULL_REQUEST_NUMBER."
-          }
-
-          $pullRequest = $pullRequestJson | ConvertFrom-Json
-          if ([string] $pullRequest.headRefName -cne $env:BUMP_BRANCH_NAME) {
-            throw "Expected pull request #$env:PULL_REQUEST_NUMBER head branch '$env:BUMP_BRANCH_NAME', but got '$($pullRequest.headRefName)'."
-          }
-
-          if ([string] $pullRequest.baseRefName -cne $env:BASE_BRANCH) {
-            throw "Expected pull request #$env:PULL_REQUEST_NUMBER base branch '$env:BASE_BRANCH', but got '$($pullRequest.baseRefName)'."
-          }
-
-          $changedFiles = @(
-            foreach ($file in @($pullRequest.files)) {
-              [string] $file.path
-            }
-          ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-          if ($changedFiles -notcontains $env:LOCKFILE_PATH) {
-            throw "Expected pull request #$env:PULL_REQUEST_NUMBER to include '$env:LOCKFILE_PATH', but got: $($changedFiles -join ', ')"
-          }
-
-          $remoteBranchHead = @(
-            git ls-remote --heads origin "refs/heads/$env:BUMP_BRANCH_NAME"
-          ) | Select-Object -Last 1
-          if ($LASTEXITCODE -ne 0) {
-            throw "Failed to inspect remote bump branch '$env:BUMP_BRANCH_NAME'."
-          }
-
-          if ([string]::IsNullOrWhiteSpace($remoteBranchHead)) {
-            throw "Expected remote bump branch '$env:BUMP_BRANCH_NAME' to exist."
-          }
-
-          Write-Host "Has-changes validation passed with result '$env:RESULT', PR #$env:PULL_REQUEST_NUMBER on '$env:BUMP_BRANCH_NAME'."
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE 'scripts/Assert-PslrmBumpHasChanges.ps1'
+          & $scriptPath
