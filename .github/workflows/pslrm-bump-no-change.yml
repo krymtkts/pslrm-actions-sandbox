@@ -6,23 +6,108 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: pwsh
+
 jobs:
-  no_change:
-    runs-on: ubuntu-latest
+  no_change_main:
+    name: no-change @main on ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: core
+            runner: ubuntu-latest
+            target_powershell_edition: core
+          - name: Windows PowerShell
+            runner: windows-latest
+            target_powershell_edition: desktop
 
     steps:
       - name: Check out sandbox repository
         uses: actions/checkout@v6
 
-      - name: Run pslrm-bump-action for no-change fixture
+      - name: Run pslrm-bump-action@main for no-change fixture
         id: bump
         uses: krymtkts/pslrm-bump-action@main
         with:
           project-path: projects/no-change-project
+          target-powershell-edition: ${{ matrix.platform.target_powershell_edition }}
           github-token: ${{ github.token }}
 
       - name: Assert result is no_change
-        shell: pwsh
+        env:
+          BUMP_BRANCH_NAME: ${{ steps.bump.outputs.bump_branch_name }}
+          PULL_REQUEST_NUMBER: ${{ steps.bump.outputs.pull_request_number }}
+          RESULT: ${{ steps.bump.outputs.result }}
+        run: |
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE 'scripts/Assert-PslrmBumpNoChange.ps1'
+          & $scriptPath
+
+  no_change_exact:
+    name: no-change @v0.0.1-alpha on ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: core
+            runner: ubuntu-latest
+            target_powershell_edition: core
+          - name: Windows PowerShell
+            runner: windows-latest
+            target_powershell_edition: desktop
+
+    steps:
+      - name: Check out sandbox repository
+        uses: actions/checkout@v6
+
+      - name: Run pslrm-bump-action@v0.0.1-alpha for no-change fixture
+        id: bump
+        uses: krymtkts/pslrm-bump-action@v0.0.1-alpha
+        with:
+          project-path: projects/no-change-project
+          target-powershell-edition: ${{ matrix.platform.target_powershell_edition }}
+          github-token: ${{ github.token }}
+
+      - name: Assert result is no_change
+        env:
+          BUMP_BRANCH_NAME: ${{ steps.bump.outputs.bump_branch_name }}
+          PULL_REQUEST_NUMBER: ${{ steps.bump.outputs.pull_request_number }}
+          RESULT: ${{ steps.bump.outputs.result }}
+        run: |
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE 'scripts/Assert-PslrmBumpNoChange.ps1'
+          & $scriptPath
+
+  no_change_major:
+    name: no-change @v0 on ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: core
+            runner: ubuntu-latest
+            target_powershell_edition: core
+          - name: Windows PowerShell
+            runner: windows-latest
+            target_powershell_edition: desktop
+
+    steps:
+      - name: Check out sandbox repository
+        uses: actions/checkout@v6
+
+      - name: Run pslrm-bump-action@v0 for no-change fixture
+        id: bump
+        uses: krymtkts/pslrm-bump-action@v0
+        with:
+          project-path: projects/no-change-project
+          target-powershell-edition: ${{ matrix.platform.target_powershell_edition }}
+          github-token: ${{ github.token }}
+
+      - name: Assert result is no_change
         env:
           BUMP_BRANCH_NAME: ${{ steps.bump.outputs.bump_branch_name }}
           PULL_REQUEST_NUMBER: ${{ steps.bump.outputs.pull_request_number }}

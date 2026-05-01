@@ -16,6 +16,9 @@ param(
     [string] $BumpBranchPrefix = $env:BUMP_BRANCH_PREFIX,
 
     [AllowEmptyString()]
+    [string] $ExpectedBumpBranchName = $env:EXPECTED_BUMP_BRANCH_NAME,
+
+    [AllowEmptyString()]
     [string] $LockfilePath = $env:LOCKFILE_PATH,
 
     [AllowEmptyString()]
@@ -55,6 +58,10 @@ if ([string]::IsNullOrWhiteSpace($RepositoryFullName)) {
 
 if (-not $BumpBranchName.StartsWith($BumpBranchPrefix)) {
     throw "Expected bump branch prefix '$BumpBranchPrefix', but got '$BumpBranchName'."
+}
+
+if ((-not [string]::IsNullOrWhiteSpace($ExpectedBumpBranchName)) -and ($BumpBranchName -cne $ExpectedBumpBranchName)) {
+    throw "Expected bump branch '$ExpectedBumpBranchName', but got '$BumpBranchName'."
 }
 
 $pullRequestJson = @(gh pr view $PullRequestNumber --repo $RepositoryFullName --json 'number,headRefName,baseRefName,files') | Select-Object -Last 1

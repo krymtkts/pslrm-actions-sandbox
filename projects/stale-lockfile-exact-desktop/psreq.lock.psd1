@@ -1,0 +1,5 @@
+@{
+    PSGameOfLife = @{
+        Repository = 'PSGallery'
+    }
+}

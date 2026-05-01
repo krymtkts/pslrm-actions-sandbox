@@ -7,29 +7,145 @@ permissions:
   contents: write
   pull-requests: write
 
+defaults:
+  run:
+    shell: pwsh
+
 jobs:
-  has_changes:
-    runs-on: ubuntu-latest
+  has_changes_main:
+    name: has-changes @main on ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: core
+            runner: ubuntu-latest
+            target_powershell_edition: core
+            expected_bump_branch_name: pslrm-bump/pocof
+            project_path: projects/stale-lockfile-main-core
+            lockfile_path: projects/stale-lockfile-main-core/psreq.lock.psd1
+          - name: Windows PowerShell
+            runner: windows-latest
+            target_powershell_edition: desktop
+            expected_bump_branch_name: pslrm-bump/get-gzipcontent
+            project_path: projects/stale-lockfile-main-desktop
+            lockfile_path: projects/stale-lockfile-main-desktop/psreq.lock.psd1
 
     steps:
       - name: Check out sandbox repository
         uses: actions/checkout@v6
 
-      - name: Run pslrm-bump-action for stale-lockfile fixture
+      - name: Run pslrm-bump-action@main for ${{ matrix.platform.project_path }}
         id: bump
         uses: krymtkts/pslrm-bump-action@main
         with:
-          project-path: projects/stale-lockfile-project
+          project-path: ${{ matrix.platform.project_path }}
+          target-powershell-edition: ${{ matrix.platform.target_powershell_edition }}
           github-token: ${{ github.token }}
 
       - name: Assert changed run outputs and created resources
-        shell: pwsh
         env:
           BASE_BRANCH: ${{ github.event.repository.default_branch }}
           BUMP_BRANCH_NAME: ${{ steps.bump.outputs.bump_branch_name }}
           BUMP_BRANCH_PREFIX: pslrm-bump/
+          EXPECTED_BUMP_BRANCH_NAME: ${{ matrix.platform.expected_bump_branch_name }}
           GH_TOKEN: ${{ github.token }}
-          LOCKFILE_PATH: projects/stale-lockfile-project/psreq.lock.psd1
+          LOCKFILE_PATH: ${{ matrix.platform.lockfile_path }}
+          PULL_REQUEST_NUMBER: ${{ steps.bump.outputs.pull_request_number }}
+          REPOSITORY_FULL_NAME: ${{ github.repository }}
+          RESULT: ${{ steps.bump.outputs.result }}
+        run: |
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE 'scripts/Assert-PslrmBumpHasChanges.ps1'
+          & $scriptPath
+
+  has_changes_exact:
+    name: has-changes @v0.0.1-alpha on ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: core
+            runner: ubuntu-latest
+            target_powershell_edition: core
+            expected_bump_branch_name: pslrm-bump/snippetpredictor
+            project_path: projects/stale-lockfile-exact-core
+            lockfile_path: projects/stale-lockfile-exact-core/psreq.lock.psd1
+          - name: Windows PowerShell
+            runner: windows-latest
+            target_powershell_edition: desktop
+            expected_bump_branch_name: pslrm-bump/psgameoflife
+            project_path: projects/stale-lockfile-exact-desktop
+            lockfile_path: projects/stale-lockfile-exact-desktop/psreq.lock.psd1
+
+    steps:
+      - name: Check out sandbox repository
+        uses: actions/checkout@v6
+
+      - name: Run pslrm-bump-action@v0.0.1-alpha for ${{ matrix.platform.project_path }}
+        id: bump
+        uses: krymtkts/pslrm-bump-action@v0.0.1-alpha
+        with:
+          project-path: ${{ matrix.platform.project_path }}
+          target-powershell-edition: ${{ matrix.platform.target_powershell_edition }}
+          github-token: ${{ github.token }}
+
+      - name: Assert changed run outputs and created resources
+        env:
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          BUMP_BRANCH_NAME: ${{ steps.bump.outputs.bump_branch_name }}
+          BUMP_BRANCH_PREFIX: pslrm-bump/
+          EXPECTED_BUMP_BRANCH_NAME: ${{ matrix.platform.expected_bump_branch_name }}
+          GH_TOKEN: ${{ github.token }}
+          LOCKFILE_PATH: ${{ matrix.platform.lockfile_path }}
+          PULL_REQUEST_NUMBER: ${{ steps.bump.outputs.pull_request_number }}
+          REPOSITORY_FULL_NAME: ${{ github.repository }}
+          RESULT: ${{ steps.bump.outputs.result }}
+        run: |
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE 'scripts/Assert-PslrmBumpHasChanges.ps1'
+          & $scriptPath
+
+  has_changes_major:
+    name: has-changes @v0 on ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: core
+            runner: ubuntu-latest
+            target_powershell_edition: core
+            expected_bump_branch_name: pslrm-bump/pester
+            project_path: projects/stale-lockfile-major-core
+            lockfile_path: projects/stale-lockfile-major-core/psreq.lock.psd1
+          - name: Windows PowerShell
+            runner: windows-latest
+            target_powershell_edition: desktop
+            expected_bump_branch_name: pslrm-bump/psscriptanalyzer
+            project_path: projects/stale-lockfile-major-desktop
+            lockfile_path: projects/stale-lockfile-major-desktop/psreq.lock.psd1
+
+    steps:
+      - name: Check out sandbox repository
+        uses: actions/checkout@v6
+
+      - name: Run pslrm-bump-action@v0 for ${{ matrix.platform.project_path }}
+        id: bump
+        uses: krymtkts/pslrm-bump-action@v0
+        with:
+          project-path: ${{ matrix.platform.project_path }}
+          target-powershell-edition: ${{ matrix.platform.target_powershell_edition }}
+          github-token: ${{ github.token }}
+
+      - name: Assert changed run outputs and created resources
+        env:
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          BUMP_BRANCH_NAME: ${{ steps.bump.outputs.bump_branch_name }}
+          BUMP_BRANCH_PREFIX: pslrm-bump/
+          EXPECTED_BUMP_BRANCH_NAME: ${{ matrix.platform.expected_bump_branch_name }}
+          GH_TOKEN: ${{ github.token }}
+          LOCKFILE_PATH: ${{ matrix.platform.lockfile_path }}
           PULL_REQUEST_NUMBER: ${{ steps.bump.outputs.pull_request_number }}
           REPOSITORY_FULL_NAME: ${{ github.repository }}
           RESULT: ${{ steps.bump.outputs.result }}

@@ -1,0 +1,5 @@
+@{
+    pocof = @{
+        Repository = 'PSGallery'
+    }
+}

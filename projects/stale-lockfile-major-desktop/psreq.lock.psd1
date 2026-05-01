@@ -1,5 +1,5 @@
 @{
-    pocof = @{
+    PSScriptAnalyzer = @{
         Repository = 'PSGallery'
     }
 }

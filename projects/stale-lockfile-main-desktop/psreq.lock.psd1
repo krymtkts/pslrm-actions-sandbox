@@ -1,0 +1,5 @@
+@{
+    'Get-GzipContent' = @{
+        Repository = 'PSGallery'
+    }
+}
