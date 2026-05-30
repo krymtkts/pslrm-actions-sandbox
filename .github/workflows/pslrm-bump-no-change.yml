@@ -47,7 +47,7 @@ jobs:
           & $scriptPath
 
   no_change_exact:
-    name: no-change @v0.0.1-alpha on ${{ matrix.platform.name }}
+    name: no-change @v0.0.1 on ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       fail-fast: false
@@ -64,9 +64,9 @@ jobs:
       - name: Check out sandbox repository
         uses: actions/checkout@v6
 
-      - name: Run pslrm-bump-action@v0.0.1-alpha for no-change fixture
+      - name: Run pslrm-bump-action@v0.0.1 for no-change fixture
         id: bump
-        uses: krymtkts/pslrm-bump-action@v0.0.1-alpha
+        uses: krymtkts/pslrm-bump-action@v0.0.1
         with:
           project-path: projects/no-change-project
           target-powershell-edition: ${{ matrix.platform.target_powershell_edition }}
