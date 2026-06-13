@@ -1,0 +1,25 @@
+name: CI test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  test:
+    name: CI test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Dummy step
+        run: |
+          Write-Host "This is a dummy step to verify the workflow runs successfully."
