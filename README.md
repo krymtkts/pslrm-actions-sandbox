@@ -11,10 +11,11 @@ This repository covers [`krymtkts/pslrm-bump-action`](https://github.com/krymtkt
 This workflow will run against `projects/no-change-project`.
 
 - Purpose: confirm `pslrm-bump-action` reports `changed=false` when the lockfile is up to date.
-- Ref coverage: `@main`, `@v0.0.1-alpha`, and `@v0`.
+- Ref coverage: `@main`, `@v0.0.1`, `@v0`, and `@feature/signed-commit`.
 - Platform coverage: `core` and Windows PowerShell (`target-powershell-edition=desktop`).
 - File: `.github/workflows/pslrm-bump-no-change.yml`
 - Trigger: `workflow_dispatch`
+- Dispatch input: set `action_ref` to run only one ref, or use `all` to run all refs.
 - Permissions: `contents: read`
 
 ### `pslrm-bump-has-changes`
@@ -22,7 +23,7 @@ This workflow will run against `projects/no-change-project`.
 This workflow will run against dedicated `projects/stale-lockfile-*` fixtures.
 
 - Purpose: confirm each ref / PowerShell case can handle its own bump branch / pull request path.
-- Ref coverage: `@main`, `@v0.0.1-alpha`, and `@v0`.
+- Ref coverage: `@main`, `@v0.0.1`, `@v0`, and `@feature/signed-commit`.
 - Platform coverage: `core` and Windows PowerShell (`target-powershell-edition=desktop`).
 - Fixture model: every case uses its own stale lockfile copy and its own module name.
 - Expected result: every case should return `result=created`, `updated`, or `noop`.
@@ -30,6 +31,7 @@ This workflow will run against dedicated `projects/stale-lockfile-*` fixtures.
 - Prerequisite: turn on `Allow GitHub Actions to create and approve pull requests`.
 - Token: this workflow uses `GITHUB_TOKEN`.
 - Trigger: `workflow_dispatch`
+- Dispatch input: set `action_ref` to run only one ref, or use `all` to run all refs.
 - Permissions: `contents: write` and `pull-requests: write`
 
 > [!NOTE]

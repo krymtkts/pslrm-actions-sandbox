@@ -2,6 +2,18 @@ name: pslrm-bump-action detects no changes
 
 on:
   workflow_dispatch:
+    inputs:
+      action_ref:
+        description: Run only the jobs for this pslrm-bump-action ref.
+        default: all
+        options:
+          - all
+          - main
+          - v0.0.1
+          - v0
+          - feature/signed-commit
+        required: false
+        type: choice
 
 permissions:
   contents: read
@@ -12,6 +24,7 @@ defaults:
 
 jobs:
   no_change_main:
+    if: ${{ inputs.action_ref == 'all' || inputs.action_ref == 'main' }}
     name: no-change @main on ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -47,6 +60,7 @@ jobs:
           & $scriptPath
 
   no_change_exact:
+    if: ${{ inputs.action_ref == 'all' || inputs.action_ref == 'v0.0.1' }}
     name: no-change @v0.0.1 on ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -82,6 +96,7 @@ jobs:
           & $scriptPath
 
   no_change_major:
+    if: ${{ inputs.action_ref == 'all' || inputs.action_ref == 'v0' }}
     name: no-change @v0 on ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -117,6 +132,7 @@ jobs:
           & $scriptPath
 
   no_change_signed_commit:
+    if: ${{ inputs.action_ref == 'all' || inputs.action_ref == 'feature/signed-commit' }}
     name: no-change @feature/signed-commit on ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
