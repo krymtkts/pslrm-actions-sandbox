@@ -1,5 +1,6 @@
 @{
-    PSGameOfLife = @{
-        Repository = 'PSGallery'
+    'PSGameOfLife' = @{
+        'Repository' = 'PSGallery'
+        'Version' = '0.0.1'
     }
 }
