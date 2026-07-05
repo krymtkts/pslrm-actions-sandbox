@@ -9,7 +9,7 @@ on:
         options:
           - all
           - main
-          - v0.0.1
+          - v0.0.2
           - v0
           - feature/signed-commit
         required: false
@@ -73,8 +73,8 @@ jobs:
           & $scriptPath
 
   has_changes_exact:
-    if: ${{ inputs.action_ref == 'all' || inputs.action_ref == 'v0.0.1' }}
-    name: has-changes @v0.0.1 on ${{ matrix.platform.name }}
+    if: ${{ inputs.action_ref == 'all' || inputs.action_ref == 'v0.0.2' }}
+    name: has-changes @v0.0.2 on ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       fail-fast: false
@@ -97,9 +97,9 @@ jobs:
       - name: Check out sandbox repository
         uses: actions/checkout@v6
 
-      - name: Run pslrm-bump-action@v0.0.1 for ${{ matrix.platform.project_path }}
+      - name: Run pslrm-bump-action@v0.0.2 for ${{ matrix.platform.project_path }}
         id: bump
-        uses: krymtkts/pslrm-bump-action@v0.0.1
+        uses: krymtkts/pslrm-bump-action@v0.0.2
         with:
           project-path: ${{ matrix.platform.project_path }}
           target-powershell-edition: ${{ matrix.platform.target_powershell_edition }}
