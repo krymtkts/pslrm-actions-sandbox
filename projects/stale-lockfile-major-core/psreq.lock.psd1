@@ -1,5 +1,6 @@
 @{
-    Pester = @{
-        Repository = 'PSGallery'
+    'Pester' = @{
+        'Repository' = 'PSGallery'
+        'Version' = '5.7.0'
     }
 }
