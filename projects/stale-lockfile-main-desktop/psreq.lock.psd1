@@ -1,5 +1,6 @@
 @{
     'Get-GzipContent' = @{
-        Repository = 'PSGallery'
+        'Repository' = 'PSGallery'
+        'Version' = '0.1.2'
     }
 }
