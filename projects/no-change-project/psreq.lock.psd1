@@ -1,6 +1,6 @@
 @{
     'pocof' = @{
         'Repository' = 'PSGallery'
-        'Version' = '0.23.0'
+        'Version' = '0.24.0'
     }
 }
